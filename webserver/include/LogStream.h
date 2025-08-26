@@ -13,7 +13,7 @@ public:
     const char* data_;
     int len_;
 };
-
+// LogStream类用于管理日志输出流，重载输出流运算符<<，实现前端将各种类型的值写入内部缓冲区
 class LogStream : noncopyable{
 public:
     // 定义一个Buffer类型，使用固定大小的缓冲区

@@ -11,8 +11,14 @@ class Timer;
 
 class TimerQueue {
 public:
+    using TimerCallback = std::function<void()>;
+
+    explicit TimerQueue(EventLoop* loop);
+    ~TimerQueue();
+
+    void addTimer(TimerCallback cb,Timestamp when,double interval);
 private:
-    // 使用别名,避免类型冗长
+    // 使用别名,避免类型冗长,Timer*需要手动释放内存
     using Entry = std::pair<Timestamp, Timer*>;
     using TimerList = std::set<Entry>;
     // 在本loop中添加定时器

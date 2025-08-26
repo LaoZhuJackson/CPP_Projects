@@ -14,7 +14,44 @@
 class Channel;
 class Poller;
 
+// 事件循环类 主要包含了两个大模块 Channel Poller(epoll的抽象)
 class EventLoop : noncopyable{
+public:
+    using Functor = std::function<void()>;
+
+    EventLoop();
+    ~EventLoop();
+
+    void loop(); //开始事件循环
+    void quit(); //退出事件循环
+
+    Timestamp pollReturnTime() const {return pollReturnTime_;} //获取上次poll的返回时间
+
+    void runInLoop(Functor cb); //在事件循环中执行回调函数
+    void queueInLoop(Functor cb); //将回调函数排入队列
+
+    // 通过eventfd唤醒loop所在的线程
+    void wakeup();
+
+    void updateChannel(Channel* channel); //更新通道
+    void removeChannel(Channel* channel); //移除通道
+    bool hasChannel(Channel* channel); //检查通道是否存在
+
+    bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); } //检查当前线程是否为事件循环所在的线程,threadId_为EventLoop创建时的线程id CurrentThread::tid()为当前线程id
+    /**
+     * 定时任务相关函数
+     */
+    void runAt(Timestamp timestamp, Functor &&cb){
+        timerQueue_->addTimer(std::move(cb), timestamp, 0.0);
+    }
+    void runAfter(double waitime,Functor &&cb){
+        Timestamp time(addTime(Timestamp::now(),waitime));
+        runAt(time,std::move(cb));
+    }
+    void runEvery(double interval,Functor &&cb){
+        Timestamp timestamp(addTime(Timestamp::now(), interval));
+        timerQueue_->addTimer(std::move(cb), timestamp, interval);
+    }
 private:
     void handleRead(); //给eventfd返回的文件描述符wakeupFd_绑定的事件回调 当wakeup()时 即有事件发生时 调用handleRead()读wakeupFd_的8字节 同时唤醒阻塞的epoll_wait
     void doPendingFunctors(); //执行待处理的回调函数
@@ -34,40 +71,7 @@ private:
     ChannelList activeChannels_; //活动通道列表，存储当前活跃的通道
 
     std::atomic_bool callingPendingFunctors_; //标识当前loop是否有需要执行的回调操作
-    std::vector<Functor> pendingFunctors_; //存储loop需要执行的所有回调操作
+    std::vector<Functor> pendingFunctors_; //动态数组：存储loop需要执行的所有回调操作
     std::mutex mutex_; //互斥锁，保护上面vector容器的线程安全操作
-public:
-    using Functor = std::function<void()>;
-
-    EventLoop();
-    ~EventLoop();
-
-    void loop(); //开始事件循环
-    void quit(); //退出事件循环
-
-    Timestamp pollReturnTime() const {return pollReturnTime_;} //获取上次poll的返回时间
-
-    void runInLoop(Functor cb); //在事件循环中执行回调函数
-    void queueInLoop(Functor cb); //将回调函数排入队列
-
-    void updateChannel(Channel* channel); //更新通道
-    void removeChannel(Channel* channel); //移除通道
-    bool hasChannel(Channel* channel); //检查通道是否存在
-
-    bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); } //检查当前线程是否为事件循环所在的线程,threadId_为EventLoop创建时的线程id CurrentThread::tid()为当前线程id
-    /**
-     * 定时任务相关函数
-     */
-    void runAt(Timestamp timestamp, Functor &&cb){
-    timerQueue_->addTimer(std::move(cb), timestamp, 0.0);
-    }
-    void runAfter(double waitime,Functor &&cb){
-        Timestamp time(addTimer(Timestamp::now(),waitime));
-        runAt(time,std::move(cb));
-    }
-    void runEvery(double interval,Functor &&cb){
-        Timestamp timestamp(addTimer(Timestamp::now(), interval));
-        timerQueue_->addTimer(std::move(cb), timestamp, interval);
-    }
 };
 

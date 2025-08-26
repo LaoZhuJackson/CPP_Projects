@@ -13,7 +13,7 @@ public:
     explicit Timestamp(int64_t microSecondsSinceEpoch) : microSecondsSinceEpoch_(microSecondsSinceEpoch) {} // 带参数的构造函数
 
     // 获取当前时间戳
-    static Timestamp now()
+    static Timestamp now();
     std::string toString()const; //该函数不会修改类的任何成员变量（除非变量被声明为 mutable）
 
     //格式, "%4d年%02d月%02d日 星期%d %02d:%02d:%02d.%06d",时分秒.微秒,showMicroseconds = false则不显示微秒
@@ -22,7 +22,7 @@ public:
     int64_t microSecondsSinceEpoch() const { return microSecondsSinceEpoch_; } // 获取自纪元以来的微秒数
     // 获取自纪元以来的秒数
     static const int kMicroSecondsPerSecond = 1000 * 1000; // 每秒的微秒数
-    time_t secondsSinceEpoch() const { return static_cast<time_t>(microSecondsSince/kMicroSecondsPerSecond); }
+    time_t secondsSinceEpoch() const { return static_cast<time_t>(microSecondsSinceEpoch_/kMicroSecondsPerSecond); }
 
     static Timestamp invalid() { return Timestamp(); } // 返回一个无效的时间戳,不用创建类实例：可以直接通过类名调用，Timestamp ts = Timestamp::invalid();
 };

@@ -13,7 +13,7 @@ template <int buffer_size>
 class FixedBuffer : noncopyable
 {
 private:
-    char data_[buffer_size]; //固定大小的缓冲区
+    char data_[buffer_size]; //固定大小的缓冲区,为指定大小的字符串数组
     char *cur_; //当前指针，指向缓冲区中下一个可以写入的位置
     int size_; // 缓冲区大小
 public:
