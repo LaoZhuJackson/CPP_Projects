@@ -95,7 +95,7 @@ Logger::Logger(const char *filename, int line, LogLevel level) : impl_(level, 0,
 {
 }
 Logger::~Logger(){
-    impl_.finish();
+    impl_.finish(); // 在析构时调用finish写入
     const LogStream::Buffer &buffer = stream().buffer();
     // 输出(默认项终端输出)
     g_output(buffer.data(),buffer.length());
