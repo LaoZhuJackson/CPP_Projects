@@ -47,18 +47,6 @@ void TimerQueue::addTimer(TimerCallback cb,Timestamp when,double interval){
     loop_ ->runInLoop(std::bind(&TimerQueue::addTimerInLoop,this,timer));
 }
 
-bool TimerQueue::insert(Timer* timer){
-    bool earliestChanged = false;
-    Timestamp when = timer->expiration();
-    TimerList::iterator it = timers_.begin();
-    // 说明最早的定时器已经被替换了
-    if (it == timers_.end() || when < it->first) earliestChanged = true;
-    // 定时器管理红黑树插入此新定时器
-    timers_.insert(Entry(when, timer));
-
-    return earliestChanged;
-}
-
 void TimerQueue::addTimerInLoop(Timer* timer){
     // 是否取代了最早的定时触发时间
     bool earliestChanged = insert(timer);

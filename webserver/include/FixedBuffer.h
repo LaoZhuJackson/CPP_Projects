@@ -33,12 +33,15 @@ public:
     // 返回缓冲区中当前有效数据长度
     int length() const {return size_;}
 
+    // 返回当前指针的位置
+    char* current() {return cur_;}
+
     // 返回缓冲区中剩余可用空间的大小
     size_t avail() const {return static_cast<size_t>(buffer_size - size_);}
 
     // 更新当前指针，增加指定长度
     void add(size_t len){
-        cur+=len;
+        cur_ += len;
         size_ += len;
     }
     // 重置当前指针，回到缓冲区的起始位置

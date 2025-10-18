@@ -106,7 +106,6 @@ void EPollPoller::update(int operation, Channel* channel){
     // ::epoll_ctl(...): 调用Linux系统函数，根据 operation（ADD/MOD/DEL）来操作epoll实例。失败时，返回 -1，并且全局变量 errno 会被设置为相应的错误代码
     if(::epoll_ctl(epollfd_, operation,fd,&event)<0){
         if(operation == EPOLL_CTL_DEL) LOG_ERROR<<"epoll_ctl del error:"<<errno;
-    }else{
-        LOG_FATAL<<"epoll_ctl add/mod error:"<<errno;
+        else LOG_FATAL<<"epoll_ctl add/mod error:"<<errno;
     }
 }
